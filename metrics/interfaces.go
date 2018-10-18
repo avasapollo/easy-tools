@@ -14,6 +14,6 @@ type Transaction interface {
 	GetProvider() MetricProvider
 	GetType() TransactionType
 
-	StartTransaction()
-	EndTransaction()
+	StartTransaction() error
+	EndTransaction() error
 }
