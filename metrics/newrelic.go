@@ -8,6 +8,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	NerelicTransactionContextKeyName = "newrelic_transaction"
+)
+
 type newrelicProvider struct {
 	logger *logrus.Entry
 }
@@ -36,10 +40,11 @@ type newRelicDatabaseTransaction struct {
 }
 
 func NewNewrelicDatabaseTransaction(ctx context.Context, details DatabaseTransactionDetails) (Transaction, error) {
-	txn := ctx.Value("newrelic_transaction").(newrelic.Transaction)
+	txn := ctx.Value(NerelicTransactionContextKeyName).(newrelic.Transaction)
 	if txn == nil {
 		return nil, fmt.Errorf("couldn't possible recorder the transaction in newrelic, newrelic transaction is not in the context")
 	}
+
 	return &newRelicDatabaseTransaction{
 		transaction: txn,
 		segment: &newrelic.DatastoreSegment{
@@ -54,12 +59,13 @@ func NewNewrelicDatabaseTransaction(ctx context.Context, details DatabaseTransac
 	}, nil
 }
 
-func (svc newRelicDatabaseTransaction) StartTransaction() {
+func (svc newRelicDatabaseTransaction) StartTransaction() error {
 	svc.segment.StartTime = newrelic.StartSegmentNow(svc.transaction)
+	return nil
 }
 
-func (svc newRelicDatabaseTransaction) EndTransaction() {
-	svc.segment.End()
+func (svc newRelicDatabaseTransaction) EndTransaction() error {
+	return svc.segment.End()
 }
 
 func (svc newRelicDatabaseTransaction) GetProvider() MetricProvider {
