@@ -37,6 +37,7 @@ func (svc service) WrapDatabaseTransaction(ctx context.Context, config DatabaseT
 				"transaction_type": t.GetType(),
 			}).Error("couldn't possible start the transaction")
 			continue
+
 		}
 	}
 
